@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "User.h"
 #include "Settings.h"
 
 int main() {

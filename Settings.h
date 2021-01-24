@@ -3,11 +3,17 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "Game.h"
+
+#define SIZE 15
+
 void Scoreboard(void) {
-	FILE* Input_File = fopen("Scoreboard.txt" , "r") ;
-	char input[100] ;
-	while ( fscanf(Input_File , "%s" , input) != EOF )
-		printf("%s\n" , input) ;
+	FILE* Input_File = fopen("User_Data.txt" , "r") ;
+	char Player[100] , Score[100] ;
+	while ( fscanf(Input_File , "%s" , Player) != EOF ) {
+		fscanf(Input_File , "%s" , Score) ;
+		printf("%s / Score : %s\n" , Player , Score) ;
+	}
 	fclose(Input_File) ;
 	return ;
 }
@@ -15,12 +21,12 @@ void Scoreboard(void) {
 void PVP(void) {
 	User Player1 = Signin() ;
 	User Player2 = Signin() ;
-	printf("Player1 :\n") ;
-	printf("\t Username : %s\n" , Player1.Username) ;
-	printf("\t Score : %d\n" , Player1.Score) ;
-	printf("Player2 :\n") ;
-	printf("\t Username : %s\n" , Player2.Username) ;
-	printf("\t Score : %d\n" , Player2.Score) ;
+	int Board1[SIZE][SIZE] ;
+	int Board2[SIZE][SIZE] ;
+	int* Board1_Pointer = &Board1[0][0] ;
+	Board1_Pointer = Game_init(Player1 , Board1_Pointer) ;
+	int* Board2_Pointer = &Board2[0][0] ;
+	Board2_Pointer = Game_init(Player2 , Board2_Pointer) ;
 	return ;
 }
 
