@@ -53,12 +53,12 @@ user Signin(void) {
 	printf("Enter Your Username : ") ;
 	gets(Username) ;
 	if ( !strcmp(Username , "Bot") ) {
-		printf("Username cannot be \"Bot\"\n") ;
+		printf("\e[1;31m") , printf("Username cannot be \"Bot\"\n") , printf("\e[0m") ;
 		return Signin() ;
 	}
 	for ( int i = 0 ; i < strlen(Username) ; i ++ )
 		if ( Username[i] == ' ' ) {
-			printf("Username Cannot Contain Spaces\n") ;
+			printf("\e[1;31m") , printf("Username Cannot Contain Spaces\n") , printf("\e[0m") ;
 			return Signin() ;
 		}
 	user Current_User ;
@@ -66,14 +66,14 @@ user Signin(void) {
 		Current_User.Score = User_Score(Username) ;
 		Current_User.Cur_Score = 0 ;
 		strcpy(Current_User.Username , Username) ;
-		printf("Login Successful !\n") ;
+		printf("\e[1;35m") , printf("Login Successful !\n") , printf("\e[0m") ;
 	}
 	else {
 		Signup(Username) ;
 		Current_User.Score = 0 ;
 		Current_User.Cur_Score = 0 ;
 		strcpy(Current_User.Username , Username) ;
-		printf("New User Created !\n") ;
+		printf("\e[1;35m") , printf("New User Created !\n") , printf("\e[0m") ;
 	}
 	return Current_User ;
 }
@@ -122,7 +122,11 @@ void Scoreboard(void) {
 	Input_File = fopen("User_Data.txt" , "r") ;
 	while ( fscanf(Input_File , "%s" , Player) != EOF ) {
 		fscanf(Input_File , "%s\n" , Score) ;
+		printf("\e[1;31m") ;
+		printf("#####################################################\n") ;
 		printf("Player : %s / Score : %s\n" , Player , Score) ;
+		printf("#####################################################\n") ;
+		printf("\e[0m") ;
 	}
 	fclose(Input_File) ;
 	return ;

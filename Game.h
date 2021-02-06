@@ -9,10 +9,20 @@
 #define SIZE 15
 
 void Show_board(user* Player , game_board* Board) {	
-	printf("###### %s's Board ###### Coins : %d ######\n" , Player->Username , Player->Score) ;
+	printf("\e[0;32m") , printf("###### %s's Board ###### Coins : %d ######\n" , Player->Username , Player->Score) , printf("\e[0m") ;
 	for ( int i = 1 ; i <= 10 ; i ++ ) {
-		for ( int j = 1 ; j <= 10 ; j ++ )
-			printf("%c " , Board->Board[i][j]) ;
+		for ( int j = 1 ; j <= 10 ; j ++ ) {
+			if ( Board->Board[i][j] == 'W' )
+				printf("\e[0;34m") , printf("%c " , Board->Board[i][j]) , printf("\e[0m") ;
+			else if ( Board->Board[i][j] == 'E' )
+				printf("\e[0;31m") , printf("%c " , Board->Board[i][j]) , printf("\e[0m") ;
+			else if ( Board->Board[i][j] == 'C' )
+				printf("\e[0;33m") , printf("%c " , Board->Board[i][j]) , printf("\e[0m") ;
+			else if ( Board->Board[i][j] == 'B' )
+				printf("\e[0;32m") , printf("%c " , Board->Board[i][j]) , printf("\e[0m") ;
+			else if ( Board->Board[i][j] == 'N' )
+				printf("\e[0;37m") , printf("%c " , Board->Board[i][j]) , printf("\e[0m") ;
+		}
 		printf("\n") ;
 	}
 	printf("\n") ;
@@ -90,11 +100,10 @@ int Check_placement(game_board* Board , int Size , ship My_Ship) {
 		return -1 ;
 }
 
-void Place_ship(user* Player , int Size) {
+void Place_ship(user* Player , int Size , int type) {
 	game_board* Board = Player->Battle_Board ;
-	if ( strcmp(Player->Username , "Bot") )
+	if ( strcmp(Player->Username , "Bot") && !type )
 		Show_board(Player , Board) ;
-	printf("Enter the start and end location of the ship with size %d\n" , Size) ;
 	// get valid input and check if placement is valid
 	ship My_Ship ;
 	srand(time(0)) ;
@@ -109,17 +118,30 @@ void Place_ship(user* Player , int Size) {
 		}
 	}
 	else {
-		while ( true ) {
-			printf("(i1,j1) (i2,j2) :\n") ;
-			scanf("(%d,%d) (%d,%d)" , &My_Ship.St.X , &My_Ship.St.Y , &My_Ship.En.X , &My_Ship.En.Y) ; getchar() ;
-			if ( My_Ship.St.X > My_Ship.En.X )
-				Swap_int(&My_Ship.St.X , &My_Ship.En.X) ;
-			if ( My_Ship.St.Y > My_Ship.En.Y )
-				Swap_int(&My_Ship.St.Y , &My_Ship.En.Y) ;
-			if ( Check_placement(Board , Size , My_Ship) == -1 )
-				printf("### Invalid INPUT ###\n") ;
-			else
-				break ;
+		if ( !type ) {
+			printf("\e[1;32m") , printf("Enter the start and end location of the ship with size %d\n" , Size) , printf("\e[0m") ;
+			while ( true ) {
+				printf("\e[1;36m") , printf("(i1,j1) (i2,j2) :\n") , printf("\e[0m") ;
+				scanf("(%d,%d) (%d,%d)" , &My_Ship.St.X , &My_Ship.St.Y , &My_Ship.En.X , &My_Ship.En.Y) ; getchar() ;
+				if ( My_Ship.St.X > My_Ship.En.X )
+					Swap_int(&My_Ship.St.X , &My_Ship.En.X) ;
+				if ( My_Ship.St.Y > My_Ship.En.Y )
+					Swap_int(&My_Ship.St.Y , &My_Ship.En.Y) ;
+				if ( Check_placement(Board , Size , My_Ship) == -1 )
+					printf("\e[1;31m") , printf("### Invalid INPUT ###\n") , printf("\e[0m") ;
+				else
+					break ;
+			}
+		}
+		else {
+			while ( true ) {
+				My_Ship.St.X = (rand() % 10) + 1 ;
+				My_Ship.St.Y = (rand() % 10) + 1 ;
+				My_Ship.En.X = (rand() % 10) + 1 ;
+				My_Ship.En.Y = (rand() % 10) + 1 ;
+				if ( Check_placement(Board , Size , My_Ship) != -1 )
+					break ;
+			}
 		}
 	}
 	// add My_Ship to Linked List
@@ -156,19 +178,24 @@ void Game_init(user* Player) {
 	for ( int i = 0 ; i < SIZE ; i ++ )
 		for ( int j = 0 ; j < SIZE ; j ++ )
 			Board->Board[i][j] = 'N' ;
+	int condition = 0 ;
+	if ( strcmp(Player->Username , "Bot") ) {
+		printf("\e[1;32m") , printf("Enter 1 for auto initialization of the board and 0 for manual initialization\n") , printf("\e[0m") ;
+		scanf("%d" , &condition) ; getchar() ;
+	}
 	// place the ships
-	Place_ship(Player , 5) ;
-//	Place_ship(Player , 3) ;
-//	Place_ship(Player , 3) ;
-//	Place_ship(Player , 2) ;
-//	Place_ship(Player , 2) ;
-//	Place_ship(Player , 2) ;
-//	Place_ship(Player , 1) ;
-//	Place_ship(Player , 1) ;
-//	Place_ship(Player , 1) ;
-//	Place_ship(Player , 1) ;
+	Place_ship(Player , 5 , condition) ;
+	Place_ship(Player , 3 , condition) ;
+	Place_ship(Player , 3 , condition) ;
+	Place_ship(Player , 2 , condition) ;
+	Place_ship(Player , 2 , condition) ;
+	Place_ship(Player , 2 , condition) ;
+	Place_ship(Player , 1 , condition) ;
+	Place_ship(Player , 1 , condition) ;
+	Place_ship(Player , 1 , condition) ;
+	Place_ship(Player , 1 , condition) ;
 	// show the board one last time
-	if ( strcmp(Player->Username , "Bot") )
+//	if ( strcmp(Player->Username , "Bot") )
 		Show_board(Player , Player->Battle_Board) ;
 	return ;
 }
@@ -181,8 +208,9 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 		Board_Attacker->Board[Di][Dj] = 'E' ;
 		Attacker->Cur_Score += 1 ;
 	}
-	else
+	else {
 		Board_Attacker->Board[Di][Dj] = 'W' ;
+	}
 	// if ship is completely destroyed change E with C and change barriers to W
 	node* cur = *(Defender->head) ;
 	while ( cur != NULL ) {
@@ -212,8 +240,8 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 					Board_Attacker->Board[i][STj - 1] = 'W' ;
 					Board_Attacker->Board[i][ENj + 1] = 'W' ;
 				}
+				break ;
 			}
-			break ;
 		}
 		else if ( STj == ENj ) {
 			int flag = 1 ;
@@ -239,12 +267,12 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 					Board_Attacker->Board[STi - 1][j] = 'W' ;
 					Board_Attacker->Board[ENi + 1][j] = 'W' ;
 				}
+				break ;
 			}
-			break ;
 		}
 		cur = cur->next ;
 	}
-	if ( strcmp(Attacker->Username , "Bot") )
+	if ( strcmp(Attacker->Username , "Bot") && strcmp(Defender->Username , "Bot") )
 		Show_board(Attacker , Board_Attacker) ;
 	if ( *(Defender->head) == NULL )
 		return 1 ;
