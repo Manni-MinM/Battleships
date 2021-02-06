@@ -23,6 +23,7 @@ typedef struct NODE node ;
 
 typedef struct {
 	int Score ;
+	int Cur_Score ;
 	char Username[100] ;
 	
 	node** head ;

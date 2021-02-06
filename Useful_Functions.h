@@ -16,3 +16,4 @@ int Str_int(char* str) {
 		val += *str - '0' , val *= 10 , str ++ ;
 	return (val / 10) ;
 }
+

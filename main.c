@@ -1,5 +1,6 @@
 // BWOTSHEWCHB
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,6 +27,10 @@ void PVP(void) {
 		condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
 		if ( condition == 1 ) {
 			printf("%s Wins\n\n" , Player1.Username) ;
+			Player1.Score += Player1.Cur_Score ;
+			Player1.Cur_Score = 0 ;
+			Player2.Score += Player2.Cur_Score / 2 ;
+			Player2.Cur_Score = 0 ;
 			break ;
 		}
 		Show_board(&Player2 , Player2.Shadow_Board) ;
@@ -35,9 +40,50 @@ void PVP(void) {
 		condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
 		if ( condition == 1 ) {
 			printf("%s Wins\n\n" , Player2.Username) ;
+			Player2.Score += Player2.Cur_Score ;
+			Player2.Cur_Score = 0 ;
+			Player1.Score += Player1.Cur_Score / 2 ;
+			Player1.Cur_Score = 0 ;
 			break ; 
 		}
 	}
+	Change_Score(Player1.Username , Player1.Score) ;
+	Change_Score(Player2.Username , Player2.Score) ;
+	return ;
+}
+void PVE(void) {
+	// sign in player and bot
+	user Player = Signin() ;
+	user Bot = Signin_bot() ;
+	// init the game for player and bot
+	Game_init(&Bot) ;
+	Game_init(&Player) ;
+	// run the game
+	srand(time(0)) ;
+	while ( true ) {
+		int condition , Di , Dj ;
+		Show_board(&Player , Player.Shadow_Board) ;
+		printf("Enter the location you want destroyed\n") ;
+		printf("(i,j) :\n") ;
+		scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+		condition = Game_turn(&Player , &Bot , Di , Dj) ;
+		if ( condition == 1 ) {
+			printf("%s Wins\n\n" , Player.Username) ;
+			Player.Score += Player.Cur_Score ;
+			Player.Cur_Score = 0 ;
+			break ;
+		}
+		Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
+		printf("Di : %d / Dj : %d\n" , Di , Dj) ;
+		condition = Game_turn(&Bot , &Player , Di , Dj) ;
+		if ( condition == 1 ) {
+			printf("Bot Wins\n\n") ;
+			Player.Score += Player.Cur_Score / 2 ;
+			Player.Cur_Score = 0 ;
+			break ; 
+		}
+	}
+	Change_Score(Player.Username , Player.Score) ;
 	return ;
 }
 
@@ -57,6 +103,7 @@ int Menu(void) {
 	}
 	else if ( Menu_Input == 2 ) {
 		// Use Game.h and run play with bot
+		PVE() ;
 		Exit_Code = 0 ;
 	}
 	else if ( Menu_Input == 3 ) {

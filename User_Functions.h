@@ -12,13 +12,26 @@ int User_Score(char* Username) {
 	int score = -1 ;
 	char input[100] ;
 	while ( fscanf(Input_File , "%s" , input) != EOF ) {
-		if ( strcmp(Username , input) == 0 ) {
+		if ( !strcmp(Username , input) ) {
 			fscanf(Input_File , "%d" , &score) ;
 			break ;
 		}
 	}
 	fclose(Input_File) ;
 	return score ;
+}
+
+void Change_Score(char* Username , int Score) {
+	FILE* File = fopen("User_Data.txt" , "r+") ;
+	char input[100] ;
+	while ( fscanf(File , "%s" , input) != EOF ) {
+		if ( !strcmp(Username , input) ) {
+			fprintf(File , "\n%d\n" , Score) ;
+			break ;
+		}
+	}
+	fclose(File) ;
+	return ;
 }
 
 void Signup(char* Username) {
@@ -39,6 +52,10 @@ user Signin(void) {
 	char Username[100] ;
 	printf("Enter Your Username : ") ;
 	gets(Username) ;
+	if ( !strcmp(Username , "Bot") ) {
+		printf("Username cannot be \"Bot\"\n") ;
+		return Signin() ;
+	}
 	for ( int i = 0 ; i < strlen(Username) ; i ++ )
 		if ( Username[i] == ' ' ) {
 			printf("Username Cannot Contain Spaces\n") ;
@@ -47,16 +64,30 @@ user Signin(void) {
 	user Current_User ;
 	if ( User_Score(Username) != -1 ) {
 		Current_User.Score = User_Score(Username) ;
+		Current_User.Cur_Score = 0 ;
 		strcpy(Current_User.Username , Username) ;
 		printf("Login Successful !\n") ;
 	}
 	else {
 		Signup(Username) ;
 		Current_User.Score = 0 ;
+		Current_User.Cur_Score = 0 ;
 		strcpy(Current_User.Username , Username) ;
 		printf("New User Created !\n") ;
 	}
 	return Current_User ;
+}
+
+user Signin_bot(void) {
+	char Username[100] ;
+	strcpy(Username , "Bot") ;
+	user Bot ;
+	if ( User_Score(Username) != -1 ) {
+		Bot.Score = User_Score(Username) ;
+		Bot.Cur_Score = 0 ;
+		strcpy(Bot.Username , Username) ;
+	}
+	return Bot ;
 }
 
 void Scoreboard(void) {
@@ -66,13 +97,12 @@ void Scoreboard(void) {
 	char Player[100] , Score[100] ;
 	while ( fscanf(Input_File , "%s" , Player) != EOF ) {
 		fscanf(Input_File , "%s\n" , Score) ;
-		printf("Player : %s / Score : %s\n" , Player , Score) ;
 		strcpy(User[it].Username , Player) ;
 		User[it].Score = Str_int(Score) ;
 		it ++ ;
 	}
 	for ( int i = 0 ; i < it ; i ++ )
-		for ( int j = i ; j < it ; j ++ )
+		for ( int j = i + 1 ; j < it ; j ++ )
 			if ( User[i].Score < User[j].Score ) {
 				int temp_Score = User[i].Score ;
 				char temp_Username[100] ;
@@ -89,5 +119,11 @@ void Scoreboard(void) {
 		fprintf(Output_File , "%d\n" , User[i].Score) ;
 	}
 	fclose(Output_File) ;
+	Input_File = fopen("User_Data.txt" , "r") ;
+	while ( fscanf(Input_File , "%s" , Player) != EOF ) {
+		fscanf(Input_File , "%s\n" , Score) ;
+		printf("Player : %s / Score : %s\n" , Player , Score) ;
+	}
+	fclose(Input_File) ;
 	return ;
 }

@@ -1,6 +1,8 @@
 // HEADER FILE
 
+#include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "Linked_List.h"
 
@@ -35,7 +37,7 @@ int Check_placement(game_board* Board , int Size , ship My_Ship) {
 			return -1 ;
 		// check ship barrier
 		for ( int j = STj ; j <= ENj ; j ++ ) {
-				if ( Board->Board[STi][j] == 'B' )
+			if ( Board->Board[STi][j] == 'B' )
 				return -1 ;
 			else if ( Board->Board[STi - 1][j] == 'B' )
 				return -1 ;
@@ -53,7 +55,7 @@ int Check_placement(game_board* Board , int Size , ship My_Ship) {
 				return -1 ;
 			else if ( Board->Board[STi][j + 1] == 'B' )
 				return -1 ;
-	}
+		}
 		return 0 ;
 	}
 	// vertical
@@ -90,21 +92,35 @@ int Check_placement(game_board* Board , int Size , ship My_Ship) {
 
 void Place_ship(user* Player , int Size) {
 	game_board* Board = Player->Battle_Board ;
-	Show_board(Player , Board) ;
+	if ( strcmp(Player->Username , "Bot") )
+		Show_board(Player , Board) ;
 	printf("Enter the start and end location of the ship with size %d\n" , Size) ;
 	// get valid input and check if placement is valid
 	ship My_Ship ;
-	while ( true ) {
-		printf("(i1,j1) (i2,j2) :\n") ;
-		scanf("(%d,%d) (%d,%d)" , &My_Ship.St.X , &My_Ship.St.Y , &My_Ship.En.X , &My_Ship.En.Y) ; getchar() ;
-		if ( My_Ship.St.X > My_Ship.En.X )
-			Swap_int(&My_Ship.St.X , &My_Ship.En.X) ;
-		if ( My_Ship.St.Y > My_Ship.En.Y )
-			Swap_int(&My_Ship.St.Y , &My_Ship.En.Y) ;
-		if ( Check_placement(Board , Size , My_Ship) == -1 )
-			printf("### Invalid INPUT ###\n") ;
-		else
-			break ;
+	srand(time(0)) ;
+	if ( !strcmp(Player->Username , "Bot") ) {
+		while ( true ) {
+			My_Ship.St.X = (rand() % 10) + 1 ;
+			My_Ship.St.Y = (rand() % 10) + 1 ;
+			My_Ship.En.X = (rand() % 10) + 1 ;
+			My_Ship.En.Y = (rand() % 10) + 1 ;
+			if ( Check_placement(Board , Size , My_Ship) != -1 )
+				break ;
+		}
+	}
+	else {
+		while ( true ) {
+			printf("(i1,j1) (i2,j2) :\n") ;
+			scanf("(%d,%d) (%d,%d)" , &My_Ship.St.X , &My_Ship.St.Y , &My_Ship.En.X , &My_Ship.En.Y) ; getchar() ;
+			if ( My_Ship.St.X > My_Ship.En.X )
+				Swap_int(&My_Ship.St.X , &My_Ship.En.X) ;
+			if ( My_Ship.St.Y > My_Ship.En.Y )
+				Swap_int(&My_Ship.St.Y , &My_Ship.En.Y) ;
+			if ( Check_placement(Board , Size , My_Ship) == -1 )
+				printf("### Invalid INPUT ###\n") ;
+			else
+				break ;
+		}
 	}
 	// add My_Ship to Linked List
 	Append(Player , My_Ship) ;
@@ -142,17 +158,18 @@ void Game_init(user* Player) {
 			Board->Board[i][j] = 'N' ;
 	// place the ships
 	Place_ship(Player , 5) ;
-	Place_ship(Player , 3) ;
-	Place_ship(Player , 3) ;
-	Place_ship(Player , 2) ;
-	Place_ship(Player , 2) ;
-	Place_ship(Player , 2) ;
-	Place_ship(Player , 1) ;
-	Place_ship(Player , 1) ;
-	Place_ship(Player , 1) ;
-	Place_ship(Player , 1) ;
+//	Place_ship(Player , 3) ;
+//	Place_ship(Player , 3) ;
+//	Place_ship(Player , 2) ;
+//	Place_ship(Player , 2) ;
+//	Place_ship(Player , 2) ;
+//	Place_ship(Player , 1) ;
+//	Place_ship(Player , 1) ;
+//	Place_ship(Player , 1) ;
+//	Place_ship(Player , 1) ;
 	// show the board one last time
-	Show_board(Player , Player->Battle_Board) ;
+	if ( strcmp(Player->Username , "Bot") )
+		Show_board(Player , Player->Battle_Board) ;
 	return ;
 }
 
@@ -160,20 +177,31 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 	// return 1 if Defender loses otherwise returns 0
 	game_board* Board_Defender = Defender->Battle_Board ;
 	game_board* Board_Attacker = Attacker->Shadow_Board ;
-	if ( Board_Defender->Board[Di][Dj] == 'B' )
+	if ( Board_Defender->Board[Di][Dj] == 'B' ) {
 		Board_Attacker->Board[Di][Dj] = 'E' ;
+		Attacker->Cur_Score += 1 ;
+	}
 	else
 		Board_Attacker->Board[Di][Dj] = 'W' ;
 	// if ship is completely destroyed change E with C and change barriers to W
 	node* cur = *(Defender->head) ;
 	while ( cur != NULL ) {
-		int STi = cur->Battleship.St.X , ENi = cur->Battleship.En.X , STj = cur->Battleship.St.Y , ENj = cur->Battleship.En.Y ;
+		int STi = cur->Battleship.St.X , ENi = cur->Battleship.En.X ;
+		int STj = cur->Battleship.St.Y , ENj = cur->Battleship.En.Y ;
 		if ( STi == ENi ) {
 			int flag = 1 ;
 			for ( int j = STj ; j <= ENj ; j ++ )
 				if ( Board_Attacker->Board[STi][j] != 'E' )
 					flag = 0 ;
 			if ( flag ) {
+				if ( ENj - STj == 5 )
+					Attacker->Cur_Score += 5 ;
+				else if ( ENj - STj == 3 )
+					Attacker->Cur_Score += 8 ;
+				else if ( ENj - STj == 2 )
+					Attacker->Cur_Score += 12 ;
+				else if ( ENj - STj == 1 )
+					Attacker->Cur_Score += 25 ;
 				Delete(Defender , cur->Battleship) ;
 				for ( int j = STj - 1 ; j <= ENj + 1 ; j ++ ) {
 					Board_Attacker->Board[STi - 1][j] = 'W' ;
@@ -193,6 +221,14 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 				if ( Board_Attacker->Board[i][STj] != 'E' )
 					flag = 0 ;
 			if ( flag ) {
+				if ( ENi - STi == 5 )
+					Attacker->Cur_Score += 5 ;
+				else if ( ENi - STi == 3 )
+					Attacker->Cur_Score += 8 ;
+				else if ( ENi - STi == 2 )
+					Attacker->Cur_Score += 12 ;
+				else if ( ENi - STi == 1 )
+					Attacker->Cur_Score += 25 ;
 				Delete(Defender , cur->Battleship) ;
 				for ( int i = STi - 1 ; i <= ENi + 1 ; i ++ ) {
 					Board_Attacker->Board[i][STj - 1] = 'W' ;
@@ -208,7 +244,8 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 		}
 		cur = cur->next ;
 	}
-	Show_board(Attacker , Board_Attacker) ;
+	if ( strcmp(Attacker->Username , "Bot") )
+		Show_board(Attacker , Board_Attacker) ;
 	if ( *(Defender->head) == NULL )
 		return 1 ;
 	return 0 ;

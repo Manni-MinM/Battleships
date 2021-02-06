@@ -1,6 +1,8 @@
 MAMAD@AUT
 42
 MinM@AUT
-22
+41
 BAGHER@AUT
 12
+Bot
+0
