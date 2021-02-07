@@ -29,7 +29,6 @@ typedef struct {
 	node** head ;
 	node** tail ;
 	
-	game_board* Saved[250] ;
 	game_board* Battle_Board ;
 	game_board* Shadow_Board ;
 } user ;
