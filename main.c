@@ -43,8 +43,12 @@ void Save(user* Player) {
 	// add the number of ships left to the file
 	int Ship_Cnt = 0 ;
 	node* cur = *(Player->head) ;
-	while ( cur != NULL )
-		Ship_Cnt ++ , cur = cur->next ;
+	while ( cur != NULL ) {
+		Ship_Cnt ++ ;	
+		if ( cur == *(Player->tail) )
+			break ;
+		cur = cur->next ;
+	}
 	printf("Ship_Cnt is saved with value : %d\n" , Ship_Cnt) ;
 	fwrite(&Ship_Cnt , sizeof(int) , 1 , File) ;
 	// add the data for each ship left to file
@@ -54,6 +58,8 @@ void Save(user* Player) {
 		fwrite(&cur->Battleship.En.X , sizeof(int) , 1 , File) ;
 		fwrite(&cur->Battleship.St.Y , sizeof(int) , 1 , File) ;
 		fwrite(&cur->Battleship.En.Y , sizeof(int) , 1 , File) ;
+		if ( cur == *(Player->tail) )
+			break ;
 		cur = cur->next ;
 	}
 	fclose(File) ;
@@ -192,8 +198,8 @@ void PVP(void) {
 }
 void PVE(void) {
 	// sign in player and bot
-	user Player = Signin() ;
 	user Bot = Signin_bot() ;
+	user Player = Signin() ;
 	// init the game for player and bot
 	Game_init(&Bot) ;
 	Game_init(&Player) ;

@@ -270,6 +270,8 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 				break ;
 			}
 		}
+		if ( cur == *(Defender->tail) )
+			break ;
 		cur = cur->next ;
 	}
 	if ( strcmp(Attacker->Username , "Bot") && strcmp(Defender->Username , "Bot") )

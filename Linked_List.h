@@ -10,6 +10,8 @@ node* Search(user* Player , ship My_Ship) {
 		if ( cur->Battleship.St.X == My_Ship.St.X && cur->Battleship.St.Y == My_Ship.St.Y )
 			if ( cur->Battleship.En.X == My_Ship.En.X && cur->Battleship.En.Y == My_Ship.En.Y )
 				return cur ;
+		if ( cur == *(Player->tail) )
+			break ;
 		cur = cur->next ;
 	}
 	return NULL ;
