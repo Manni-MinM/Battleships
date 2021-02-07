@@ -195,7 +195,7 @@ void Game_init(user* Player) {
 	Place_ship(Player , 1 , condition) ;
 	Place_ship(Player , 1 , condition) ;
 	// show the board one last time
-//	if ( strcmp(Player->Username , "Bot") )
+	if ( strcmp(Player->Username , "Bot") )
 		Show_board(Player , Player->Battle_Board) ;
 	return ;
 }

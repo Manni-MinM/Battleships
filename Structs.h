@@ -11,24 +11,25 @@ typedef struct {
 } game_board ;
 
 typedef struct {
-        point St , En ;
+	point St , En ;
 } ship ;
 
 struct NODE {
-        ship Battleship ;
-        struct NODE* prev ;
-        struct NODE* next ;
+	ship Battleship ;
+	struct NODE* prev ;
+	struct NODE* next ;
 } ;
 typedef struct NODE node ;
 
 typedef struct {
+	char Username[100] ;
 	int Score ;
 	int Cur_Score ;
-	char Username[100] ;
 	
 	node** head ;
 	node** tail ;
 	
+	game_board* Saved[250] ;
 	game_board* Battle_Board ;
 	game_board* Shadow_Board ;
 } user ;

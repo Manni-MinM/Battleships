@@ -10,6 +10,14 @@
 
 #define SIZE 15
 
+void Save(user* Player1 , user* Player2) {
+	return ;
+}
+
+void Load(void) {
+	return ;
+}
+
 void PVP(void) {
 	// sign in the players
 	user Player1 = Signin() ;
@@ -21,9 +29,21 @@ void PVP(void) {
 	while ( true ) {
 		int condition , Di , Dj ;
 		Show_board(&Player1 , Player1.Shadow_Board) ;
-		printf("\e[4;32m") , printf("Enter the location you want destroyed\n") , printf("\e[0m") ;
+		printf("\e[4;32m") , printf("Enter the location you want destroyed or enter (-1,-1) to save and quit\n") , printf("\e[0m") ;
 		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-		scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+		// checks if Di and Dj are valid
+		while ( true ) { 
+			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+			if ( Di == -1 && Dj == -1 ) {
+				// TODO : save and quit
+				printf("SAVED !\n") ;
+				return ;
+			}
+			else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+				printf("\e[1;31m") , printf("### Invalid INPUT ###\n") , printf("\e[0m") ;
+			else
+				break ;
+		}
 		condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player1.Username) , printf("\e[0m") ;
@@ -34,9 +54,21 @@ void PVP(void) {
 			break ;
 		}
 		Show_board(&Player2 , Player2.Shadow_Board) ;
-		printf("\e[4;32m") , printf("Enter the location you want destroyed\n") , printf("\e[0m") ;
+		printf("\e[4;32m") , printf("Enter the location you want destroyed or enter (-1,-1) to save and quit\n") , printf("\e[0m") ;
 		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-		scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+		// checks if Di and Dj are valid
+		while ( true ) { 
+			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+			if ( Di == -1 && Dj == -1 ) {
+				// TODO : save and quit
+				printf("SAVED !\n") ;
+				return ;
+			}
+			else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+				printf("\e[1;31m") , printf("### Invalid INPUT ###\n") , printf("\e[0m") ;
+			else
+				break ;
+		}
 		condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player2.Username) , printf("\e[0m") ;
@@ -63,9 +95,21 @@ void PVE(void) {
 	while ( true ) {
 		int condition , Di , Dj ;
 		Show_board(&Player , Player.Shadow_Board) ;
-		printf("\e[4;32m") , printf("Enter the location you want destroyed\n") , printf("\e[0m") ;
+		printf("\e[4;32m") , printf("Enter the location you want destroyed or enter (-1,-1) to save and quit\n") , printf("\e[0m") ;
 		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-		scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+		// checks if Di and Dj are valid
+		while ( true ) { 
+			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+			if ( Di == -1 && Dj == -1 ) {
+				// TODO : save and quit
+				printf("SAVED !\n") ;
+				return ;
+			}
+			else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+				printf("\e[1;31m") , printf("### Invalid INPUT ###\n") , printf("\e[0m") ;
+			else
+				break ;
+		}
 		condition = Game_turn(&Player , &Bot , Di , Dj) ;
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player.Username) , printf("\e[0m") ;

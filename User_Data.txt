@@ -1,12 +1,10 @@
 MinM@AUT
-281
+401
 MAMAD@AUT
 42
-AGHER@AUT
-12
 Bot
 0
-MinM@aut
-0
 BAGHER@AUT
+0
+MinM@UAT
 0

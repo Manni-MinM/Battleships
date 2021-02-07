@@ -120,14 +120,14 @@ void Scoreboard(void) {
 	}
 	fclose(Output_File) ;
 	Input_File = fopen("User_Data.txt" , "r") ;
+	printf("\e[1;31m") ;
+	printf("#####################################################\n") ;
 	while ( fscanf(Input_File , "%s" , Player) != EOF ) {
 		fscanf(Input_File , "%s\n" , Score) ;
-		printf("\e[1;31m") ;
-		printf("#####################################################\n") ;
 		printf("Player : %s / Score : %s\n" , Player , Score) ;
-		printf("#####################################################\n") ;
-		printf("\e[0m") ;
 	}
+	printf("#####################################################\n") ;
+	printf("\e[0m") ;
 	fclose(Input_File) ;
 	return ;
 }
