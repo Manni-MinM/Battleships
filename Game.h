@@ -161,6 +161,7 @@ void Place_ship(user* Player , int Size , int type) {
 
 void Game_init(user* Player) {
 	// init Player
+	Player->Turn = 0 ;
 	Player->head = (node**)malloc(sizeof(node*)) ;
 	Player->tail = (node**)malloc(sizeof(node*)) ;
 	*(Player->head) = NULL ;
@@ -198,6 +199,40 @@ void Game_init(user* Player) {
 	if ( strcmp(Player->Username , "Bot") )
 		Show_board(Player , Player->Battle_Board) ;
 	return ;
+}
+
+int Game_load(user* Player1 , user* Player2) {
+	// init Player1
+	Player1->head = (node**)malloc(sizeof(node*)) ;
+	Player1->tail = (node**)malloc(sizeof(node*)) ;
+	*(Player1->head) = NULL ;
+	*(Player1->tail) = NULL ;
+	Player1->Score = User_Score(Player1->Username) ;
+	for ( int i = 0 ; i < 10 ; i ++ ) {
+		if ( Player1->Battleship[i].St.X == -1 && Player1->Battleship[i].St.Y == -1 && Player1->Battleship[i].En.X == -1 && Player1->Battleship[i].En.Y == -1 )
+			continue ;
+		else
+			Append(Player1 , Player1->Battleship[i]) ;
+	}
+	// init Player2 
+	Player2->head = (node**)malloc(sizeof(node*)) ;
+	Player2->tail = (node**)malloc(sizeof(node*)) ;
+	*(Player2->head) = NULL ;
+	*(Player2->tail) = NULL ;
+	Player2->Score = User_Score(Player2->Username) ;
+	for ( int i = 0 ; i < 10 ; i ++ ) {
+                if ( Player2->Battleship[i].St.X == -1 && Player2->Battleship[i].St.Y == -1 && Player2->Battleship[i].En.X == -1 && Player2->Battleship[i].En.Y == -1 )
+                        continue ;
+                else
+                        Append(Player2 , Player2->Battleship[i]) ;
+        }
+	
+	// return player starting the next turn
+	if ( Player1->Turn == 1 )
+		return 1 ;
+	else if ( Player2->Turn == 1 )
+		return 2 ;
+	return 0 ;
 }
 
 int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {

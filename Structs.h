@@ -23,11 +23,14 @@ typedef struct NODE node ;
 
 typedef struct {
 	char Username[100] ;
+	int Turn ;
 	int Score ;
 	int Cur_Score ;
 	
 	node** head ;
 	node** tail ;
+	
+	ship Battleship[10] ;
 	
 	game_board* Battle_Board ;
 	game_board* Shadow_Board ;
