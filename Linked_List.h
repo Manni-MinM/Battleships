@@ -40,15 +40,20 @@ void Delete(user* Player , ship My_Ship) {
 	node* cur = Search(Player , My_Ship) ;
 	if ( cur == NULL )
 		return ;
-	if ( cur == *head )
+	if ( cur == *head ) {
 		*head = cur->next ;
-	if ( cur == *tail )
+		free(cur) ;
+		return ;
+	}
+	if ( cur == *tail ) {
 		*tail = cur->prev ;
+		free(cur) ;
+		return ;
+	}
 	if ( cur->prev != NULL )
 		(cur->prev)->next = cur->next ;
 	if ( cur->next != NULL )
 		(cur->next)->prev = cur->prev ;
-	printf("CHECK 5\n") ;
 	free(cur) ;
 	return ;
 }

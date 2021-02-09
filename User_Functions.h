@@ -40,10 +40,6 @@ void Signup(char* Username) {
 	fprintf(Output_File , "%s\n" , Username) ;
 	fprintf(Output_File , "%d\n" , 0) ;
 	fclose(Output_File) ;
-	Output_File = fopen("Scoreboard.txt" , "a") ;
-	fprintf(Output_File , "%s\n" , Username) ;
-	fprintf(Output_File , "%d\n" , 0) ;
-	fclose(Output_File) ;	
 	return ;
 }
 
@@ -82,11 +78,11 @@ user Signin_bot(void) {
 	char Username[100] ;
 	strcpy(Username , "Bot") ;
 	user Bot ;
-	if ( User_Score(Username) != -1 ) {
-		Bot.Score = User_Score(Username) ;
-		Bot.Cur_Score = 0 ;
-		strcpy(Bot.Username , Username) ;
-	}
+	if ( User_Score(Username) == -1 )
+		Signup("Bot") ;
+	Bot.Score = 0 ;
+	Bot.Cur_Score = 0 ;
+	strcpy(Bot.Username , Username) ;
 	return Bot ;
 }
 

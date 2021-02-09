@@ -266,7 +266,6 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 					Attacker->Cur_Score += 12 ;
 				else if ( ENj - STj == 1 )
 					Attacker->Cur_Score += 25 ;
-				// BUG HERE !
 				Delete(Defender , cur->Battleship) ;
 				for ( int j = STj - 1 ; j <= ENj + 1 ; j ++ ) {
 					Board_Attacker->Board[STi - 1][j] = 'W' ;

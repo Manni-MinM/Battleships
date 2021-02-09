@@ -10,8 +10,6 @@
 
 #define SIZE 15
 
-// TODO : Fix random crash when ships are destroyed in PVP mode
-
 void Reset(void) {
 	FILE* File = fopen("Saved_Data.bin" , "wb") ;
 	int init_val = 0 ;
@@ -312,8 +310,8 @@ void PVP_load(user* User1 , user* User2) {
 }
 void PVE(void) {
 	// sign in player and bot
-	user Bot = Signin_bot() ;
 	user Player = Signin() ;
+	user Bot = Signin_bot() ;
 	// init the game for player and bot
 	Game_init(&Bot) ;
 	Game_init(&Player) ;
