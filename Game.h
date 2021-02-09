@@ -2,6 +2,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 
 #include "Linked_List.h"
@@ -9,7 +10,7 @@
 #define SIZE 15
 
 void Show_board(user* Player , game_board* Board) {	
-	printf("\e[0;32m") , printf("###### %s's Board ###### Coins : %d ######\n" , Player->Username , Player->Score) , printf("\e[0m") ;
+	printf("\e[0;33m") , printf("####### %s's Board #######\n\n" , Player->Username) , printf("\e[0m") ;
 	for ( int i = 1 ; i <= 10 ; i ++ ) {
 		for ( int j = 1 ; j <= 10 ; j ++ ) {
 			if ( Board->Board[i][j] == 'W' )
@@ -121,7 +122,7 @@ void Place_ship(user* Player , int Size , int type) {
 		if ( !type ) {
 			printf("\e[1;32m") , printf("Enter the start and end location of the ship with size %d\n" , Size) , printf("\e[0m") ;
 			while ( true ) {
-				printf("\e[1;36m") , printf("(i1,j1) (i2,j2) :\n") , printf("\e[0m") ;
+				printf("\e[1;36m") , printf("(i1,j1) (i2,j2) : ") , printf("\e[0m") ;
 				scanf("(%d,%d) (%d,%d)" , &My_Ship.St.X , &My_Ship.St.Y , &My_Ship.En.X , &My_Ship.En.Y) ; getchar() ;
 				if ( My_Ship.St.X > My_Ship.En.X )
 					Swap_int(&My_Ship.St.X , &My_Ship.En.X) ;
@@ -181,8 +182,9 @@ void Game_init(user* Player) {
 			Board->Board[i][j] = 'N' ;
 	int condition = 0 ;
 	if ( strcmp(Player->Username , "Bot") ) {
-		printf("\e[1;32m") , printf("Enter 1 for auto initialization of the board and 0 for manual initialization\n") , printf("\e[0m") ;
-		scanf("%d" , &condition) ; getchar() ;
+		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player->Username , Player->Score , Player->Cur_Score) , printf("\e[0m") ;
+		printf("\e[1;32m") , printf("Enter 1 for auto initialization of the board and 0 for manual initialization\n\n") , printf("\e[0m") ;
+		printf("\e[1;36m") , printf("input : ") , printf("\e[0m") , scanf("%d" , &condition) , getchar() , printf("\n") ;
 	}
 	// place the ships
 	Place_ship(Player , 5 , condition) ;
@@ -198,6 +200,10 @@ void Game_init(user* Player) {
 	// show the board one last time
 	if ( strcmp(Player->Username , "Bot") )
 		Show_board(Player , Player->Battle_Board) ;
+	// visual mambo-jambo
+	sleep(2) ;
+	system("clear") ;
+
 	return ;
 }
 

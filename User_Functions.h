@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "Structs.h"
 #include "Useful_Functions.h"
@@ -71,6 +72,7 @@ user Signin(void) {
 		strcpy(Current_User.Username , Username) ;
 		printf("\e[1;35m") , printf("New User Created !\n") , printf("\e[0m") ;
 	}
+		
 	return Current_User ;
 }
 

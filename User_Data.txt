@@ -2,3 +2,5 @@ JABER@AUT
 360
 Bot
 0
+MinM@AUT
+0

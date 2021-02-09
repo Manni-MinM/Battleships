@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <stdbool.h>
 
 #include "Game.h"
 
 #define SIZE 15
+
+// TODO : add bonus shot feature
 
 void Reset(void) {
 	FILE* File = fopen("Saved_Data.bin" , "wb") ;
@@ -58,7 +61,8 @@ void Save(user* Player) {
 		fwrite(&cur->Battleship.En.X , sizeof(int) , 1 , File) ;
 		fwrite(&cur->Battleship.St.Y , sizeof(int) , 1 , File) ;
 		fwrite(&cur->Battleship.En.Y , sizeof(int) , 1 , File) ;
-		// TODO : Fix memory leak here
+		// TODO : fix memory leak here
+		// delete(Player , cur->Battleship) ;
 		if ( cur == *(Player->tail) )
 			break ;
 		cur = cur->next ;
@@ -117,7 +121,7 @@ int Show_games(user* Player1 , user* Player2) {
 		}
 	}
 	fclose(File) ;
-	printf("\n") ;
+	printf("\e[1;32m") , printf("List Of Saved Games :\n\n") , printf("\e[0m") ;
 	char Username_Turn[100] ;
 	for ( int i = 0 ; i < it / 2 ; i ++ ) {
 		if ( Turn[i << 1 | 0] == 1 )
@@ -128,9 +132,9 @@ int Show_games(user* Player1 , user* Player2) {
 		printf("\e[1;34m") , printf("%s VS %s [%s's Turn]\n" , Username[i << 1 | 0] , Username[i << 1 | 1] , Username_Turn) , printf("\e[0m") ;
 	}
 	printf("\n") ;
-	printf("\e[1;35m") , printf("Enter The Number for The Game You Want Loaded or Enter -1 To Return To The Main Menu\n") , printf("\e[0m") ;
+	printf("\e[1;35m") , printf("Enter The Number for The Game You Want Loaded or Enter -1 To Return To The Main Menu\n\n") , printf("\e[0m") ;
 	int num ;
-	scanf("%d" , &num) , getchar() ;
+	printf("\e[1;37m") , printf("input : ") , scanf("%d" , &num) , getchar() , printf("\e[0m") ;
 	if ( num != -1 ) {
 		// transfer data to Player1
 		num -- ;
@@ -170,6 +174,9 @@ void PVP(void) {
 	// sign in the players
 	user Player1 = Signin() ;
 	user Player2 = Signin() ;
+	// visual mambo-jambo
+	sleep(1) ;
+	system("clear") ;
 	// init the game for both players
 	Game_init(&Player1) ;
 	Game_init(&Player2) ;
@@ -178,9 +185,10 @@ void PVP(void) {
 		int condition , Di , Dj ;
 
 		Player1.Turn = 1 , Player2.Turn = 0 ;
+		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player1.Username , Player1.Score , Player1.Cur_Score) , printf("\e[0m") ;
 		Show_board(&Player1 , Player1.Shadow_Board) ;
 		printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
+		printf("\e[1;37m") , printf("(i,j) : ") , printf("\e[0m") ;
 		// checks if Di and Dj are valid
 		while ( true ) {
 			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
@@ -196,6 +204,11 @@ void PVP(void) {
 		}
 		printf("\n") ;
 		condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
+
+		// visual mambo-jambo
+		sleep(2) ;
+		system("clear") ;
+
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player1.Username) , printf("\e[0m") ;
 			Player1.Score += Player1.Cur_Score ;
@@ -206,6 +219,7 @@ void PVP(void) {
 		}
 
 		Player1.Turn = 0 , Player2.Turn = 1 ;
+		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player2.Username , Player2.Score , Player2.Cur_Score) , printf("\e[0m") ;
 		Show_board(&Player2 , Player2.Shadow_Board) ;
 		printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
 		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
@@ -224,6 +238,11 @@ void PVP(void) {
 		}
 		printf("\n") ;
 		condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
+
+		// visual mambo-jambo
+		sleep(2) ;
+		system("clear") ;
+
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player2.Username) , printf("\e[0m") ;
 			Player2.Score += Player2.Cur_Score ;
@@ -245,6 +264,7 @@ void PVP_load(user* User1 , user* User2) {
 
 		if ( turn == 1 || turn == -1 ) {
 			Player1.Turn = 1 , Player2.Turn = 0 ;
+			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player1.Username , Player1.Score , Player1.Cur_Score) , printf("\e[0m") ;
 			Show_board(&Player1 , Player1.Shadow_Board) ;
 			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
 			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
@@ -263,6 +283,11 @@ void PVP_load(user* User1 , user* User2) {
 			}
 			printf("\n") ;
 			condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
+			
+			// visual mambo-jambo
+        	        sleep(2) ;
+	                system("clear") ;
+			
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("%s Wins\n\n" , Player1.Username) , printf("\e[0m") ;
 				Player1.Score += Player1.Cur_Score ;
@@ -275,6 +300,7 @@ void PVP_load(user* User1 , user* User2) {
 		}
 		if ( turn == 2 || turn == -1 ) {
 			Player1.Turn = 0 , Player2.Turn = 1 ;
+			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player2.Username , Player2.Score , Player2.Cur_Score) , printf("\e[0m") ;
 			Show_board(&Player2 , Player2.Shadow_Board) ;
 			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
 			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
@@ -293,6 +319,11 @@ void PVP_load(user* User1 , user* User2) {
 			}
 			printf("\n") ;
 			condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
+
+			// visual mambo-jambo
+			sleep(2) ;
+			system("clear") ;
+
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("%s Wins\n\n" , Player2.Username) , printf("\e[0m") ;
 				Player2.Score += Player2.Cur_Score ;
@@ -312,6 +343,9 @@ void PVE(void) {
 	// sign in player and bot
 	user Player = Signin() ;
 	user Bot = Signin_bot() ;
+	// visual mambo-jambo
+	sleep(1) ;
+	system("clear") ;
 	// init the game for player and bot
 	Game_init(&Bot) ;
 	Game_init(&Player) ;
@@ -321,6 +355,7 @@ void PVE(void) {
 		int condition , Di , Dj ;
 
 		Player.Turn = 1 , Bot.Turn = 0 ;
+		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player.Username , Player.Score , Player.Cur_Score) , printf("\e[0m") ;
 		Show_board(&Player , Player.Shadow_Board) ;
 		printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
 		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
@@ -339,6 +374,11 @@ void PVE(void) {
 		}
 		printf("\n") ;
 		condition = Game_turn(&Player , &Bot , Di , Dj) ;
+		
+		// visual mambo-jambo
+                sleep(2) ;
+                system("clear") ;
+		
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player.Username) , printf("\e[0m") ;
 			Player.Score += Player.Cur_Score ;
@@ -368,6 +408,7 @@ void PVE_load(user* User1 , user* User2) {
 
 		if ( turn == 1 || turn == -1 ) {
 			Player.Turn = 1 , Bot.Turn = 0 ;
+			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player.Username , Player.Score , Player.Cur_Score) , printf("\e[0m") ;
 			Show_board(&Player , Player.Shadow_Board) ;
 			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
 			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
@@ -386,6 +427,11 @@ void PVE_load(user* User1 , user* User2) {
 			}
 			printf("\n") ;
 			condition = Game_turn(&Player , &Bot , Di , Dj) ;
+			
+			// visual mambo-jambo
+        	        sleep(2) ;
+	                system("clear") ;
+			
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("%s Wins\n\n" , Player.Username) , printf("\e[0m") ;
 				Player.Score += Player.Cur_Score ;
@@ -423,7 +469,10 @@ int Menu(void) {
 	printf("\e[0m") ;
 
 	int Menu_Input , Exit_Code ;
+
 	scanf("%d" , &Menu_Input) , getchar() ;
+	system("clear") ;
+
 	if ( Menu_Input == 1 ) {
 		// Use Game.h and run play with a friend
 		PVP() ;
@@ -439,6 +488,7 @@ int Menu(void) {
 		user* Player1 = (user*)malloc(sizeof(user)) ;
 		user* Player2 = (user*)malloc(sizeof(user)) ;
 		int condition = Show_games(Player1 , Player2) ;
+		system("clear") ;
 		if ( condition ) {
 			if ( !strcmp(Player2->Username , "Bot") )
 				PVE_load(Player1 , Player2) ;
@@ -450,11 +500,16 @@ int Menu(void) {
 	else if ( Menu_Input == 4 ) {
 		// reset saved game data
 		Reset() ;
+		system("clear") ;
 		Exit_Code = 0 ;
 	}
 	else if ( Menu_Input == 5 ) {
 		// show the scoreboard
 		Scoreboard() ;
+		// visual mambo-jambo
+		sleep(5) ;
+		system("clear") ;
+
 		Exit_Code = 0 ;
 	}
 	else if ( Menu_Input == 6 ) {
