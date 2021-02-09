@@ -10,7 +10,7 @@
 
 #define SIZE 15
 
-// TODO : Fix random crash when ships are destroyed (save 6) [(1,5) , (1,6) , (1,7)]
+// TODO : Fix random crash when ships are destroyed in PVP mode
 
 void Reset(void) {
 	FILE* File = fopen("Saved_Data.bin" , "wb") ;
@@ -133,14 +133,14 @@ int Show_games(user* Player1 , user* Player2) {
 	printf("\e[1;35m") , printf("Enter The Number for The Game You Want Loaded or Enter -1 To Return To The Main Menu\n") , printf("\e[0m") ;
 	int num ;
 	scanf("%d" , &num) , getchar() ;
-	num -- ;
 	if ( num != -1 ) {
 		// transfer data to Player1
+		num -- ;
 		strcpy(Player1->Username , Username[num << 1 | 0]) ;
 		Player1->Cur_Score = Cur_Score[num << 1 | 0] ;
 		Player1->Turn = Turn[num << 1 | 0] ;
-		Player1->Battle_Board = malloc(sizeof(game_board)) ;
-		Player1->Shadow_Board = malloc(sizeof(game_board)) ;
+		Player1->Battle_Board = (game_board*)malloc(sizeof(game_board)) ;
+		Player1->Shadow_Board = (game_board*)malloc(sizeof(game_board)) ;
 		*Player1->Battle_Board = Battle_Board[num << 1 | 0] ;
 		*Player1->Shadow_Board = Shadow_Board[num << 1 | 0] ;
 		for ( int i = 0 ; i < Ship_Cnt[num << 1 | 0] ; i ++ )
@@ -153,8 +153,8 @@ int Show_games(user* Player1 , user* Player2) {
 		strcpy(Player2->Username , Username[num << 1 | 1]) ;
 		Player2->Cur_Score = Cur_Score[num << 1 | 1] ;
 		Player2->Turn = Turn[num << 1 | 1] ;
-		Player2->Battle_Board = malloc(sizeof(game_board)) ;
-		Player2->Shadow_Board = malloc(sizeof(game_board)) ;
+		Player2->Battle_Board = (game_board*)malloc(sizeof(game_board)) ;
+		Player2->Shadow_Board = (game_board*)malloc(sizeof(game_board)) ;
 		*Player2->Battle_Board = Battle_Board[num << 1 | 1] ;
 		*Player2->Shadow_Board = Shadow_Board[num << 1 | 1] ;
 		for ( int i = 0 ; i < Ship_Cnt[num << 1 | 1] ; i ++ )
@@ -438,8 +438,8 @@ int Menu(void) {
 	}
 	else if ( Menu_Input == 3 ) {
 		// load list of saved games
-		user* Player1 = malloc(sizeof(user)) ;
-		user* Player2 = malloc(sizeof(user)) ;
+		user* Player1 = (user*)malloc(sizeof(user)) ;
+		user* Player2 = (user*)malloc(sizeof(user)) ;
 		int condition = Show_games(Player1 , Player2) ;
 		if ( condition ) {
 			if ( !strcmp(Player2->Username , "Bot") )
@@ -467,6 +467,18 @@ int Menu(void) {
 }
 
 int main() {
+	int it , Elements_Read ;
+	FILE* File = fopen("Saved_Data.bin" , "rb") ;
+	if ( File == NULL ) {
+		// create the file
+		File = fopen("Saved_Data.bin" , "wb") ;
+	}
+	Elements_Read = fread(&it , sizeof(int) , 1 , File) ;
+	fclose(File) ;
+	if ( Elements_Read == 0 ) {
+		// initialize the file
+		Reset() ;
+	}
 	while ( true ) {
 		int Exit_Code = Menu() ;
 		if ( Exit_Code == 1 )

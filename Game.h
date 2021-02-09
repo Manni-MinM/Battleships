@@ -167,8 +167,8 @@ void Game_init(user* Player) {
 	*(Player->head) = NULL ;
 	*(Player->tail) = NULL ;
 	// build the boards
-	Player->Battle_Board = malloc(sizeof(game_board)) ;
-	Player->Shadow_Board = malloc(sizeof(game_board)) ;
+	Player->Battle_Board = (game_board*)malloc(sizeof(game_board)) ;
+	Player->Shadow_Board = (game_board*)malloc(sizeof(game_board)) ;
 	// initialize the board
 	game_board* Board ;
 	Board = Player->Battle_Board ;
@@ -214,6 +214,7 @@ int Game_load(user* Player1 , user* Player2) {
 		else
 			Append(Player1 , Player1->Battleship[i]) ;
 	}
+	
 	// init Player2 
 	Player2->head = (node**)malloc(sizeof(node*)) ;
 	Player2->tail = (node**)malloc(sizeof(node*)) ;
@@ -221,11 +222,11 @@ int Game_load(user* Player1 , user* Player2) {
 	*(Player2->tail) = NULL ;
 	Player2->Score = User_Score(Player2->Username) ;
 	for ( int i = 0 ; i < 10 ; i ++ ) {
-                if ( Player2->Battleship[i].St.X == -1 && Player2->Battleship[i].St.Y == -1 && Player2->Battleship[i].En.X == -1 && Player2->Battleship[i].En.Y == -1 )
-                        continue ;
-                else
-                        Append(Player2 , Player2->Battleship[i]) ;
-        }
+		if ( Player2->Battleship[i].St.X == -1 && Player2->Battleship[i].St.Y == -1 && Player2->Battleship[i].En.X == -1 && Player2->Battleship[i].En.Y == -1 )
+			continue ;
+		else
+			Append(Player2 , Player2->Battleship[i]) ;
+	}
 	
 	// return player starting the next turn
 	if ( Player1->Turn == 1 )
@@ -265,6 +266,7 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 					Attacker->Cur_Score += 12 ;
 				else if ( ENj - STj == 1 )
 					Attacker->Cur_Score += 25 ;
+				// BUG HERE !
 				Delete(Defender , cur->Battleship) ;
 				for ( int j = STj - 1 ; j <= ENj + 1 ; j ++ ) {
 					Board_Attacker->Board[STi - 1][j] = 'W' ;

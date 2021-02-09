@@ -22,15 +22,15 @@ void Append(user* Player , ship My_Ship) {
 	node** tail = Player->tail ;
 	if ( Search(Player , My_Ship) != NULL )
 		return ;
-	node* new = (node*)malloc(sizeof(node)) ;
-	new->Battleship = My_Ship ;
+	node* New = (node*)malloc(sizeof(node)) ;
+	New->Battleship = My_Ship ;
 	if ( *head == NULL )
-		*tail = new ;	
+		*tail = New ;	
+	New->next = *head ;
 	if ( *head != NULL ) {
-		new->next = *head ;
-		(*head)->prev = new ;
+		(*head)->prev = New ;
 	}
-	*head = new ;
+	*head = New ;
 	return ;
 }
 
@@ -42,12 +42,13 @@ void Delete(user* Player , ship My_Ship) {
 		return ;
 	if ( cur == *head )
 		*head = cur->next ;
-	if ( cur == *(Player->head) )
+	if ( cur == *tail )
 		*tail = cur->prev ;
 	if ( cur->prev != NULL )
 		(cur->prev)->next = cur->next ;
 	if ( cur->next != NULL )
 		(cur->next)->prev = cur->prev ;
+	printf("CHECK 5\n") ;
 	free(cur) ;
 	return ;
 }
