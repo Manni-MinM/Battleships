@@ -26,6 +26,7 @@ typedef struct {
 	int Turn ;
 	int Score ;
 	int Cur_Score ;
+	int Last_Shot ;
 	
 	node** head ;
 	node** tail ;

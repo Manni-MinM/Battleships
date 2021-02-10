@@ -157,6 +157,13 @@ void Place_ship(user* Player , int Size , int type) {
 		for ( int i = My_Ship.St.X ; i <= My_Ship.En.X ; i ++ )
 			Board->Board[i][My_Ship.St.Y] = 'B' ;
 	}
+		
+	// visual mambo-jambo
+	if ( !type ) {
+		sleep(1) ;
+		system("clear") ;
+	}
+
 	return ;
 }
 
@@ -248,9 +255,11 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 	game_board* Board_Attacker = Attacker->Shadow_Board ;
 	if ( Board_Defender->Board[Di][Dj] == 'B' ) {
 		Board_Attacker->Board[Di][Dj] = 'E' ;
+		Attacker->Last_Shot = 1 ;
 		Attacker->Cur_Score += 1 ;
 	}
 	else {
+		Attacker->Last_Shot = 0 ;
 		Board_Attacker->Board[Di][Dj] = 'W' ;
 	}
 	// if ship is completely destroyed change E with C and change barriers to W

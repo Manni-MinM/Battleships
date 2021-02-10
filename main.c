@@ -11,8 +11,6 @@
 
 #define SIZE 15
 
-// TODO : add bonus shot feature
-
 void Reset(void) {
 	FILE* File = fopen("Saved_Data.bin" , "wb") ;
 	int init_val = 0 ;
@@ -61,8 +59,8 @@ void Save(user* Player) {
 		fwrite(&cur->Battleship.En.X , sizeof(int) , 1 , File) ;
 		fwrite(&cur->Battleship.St.Y , sizeof(int) , 1 , File) ;
 		fwrite(&cur->Battleship.En.Y , sizeof(int) , 1 , File) ;
-		// TODO : fix memory leak here
-		// delete(Player , cur->Battleship) ;
+		// fixed the memory leak here
+		Delete(Player , cur->Battleship) ;
 		if ( cur == *(Player->tail) )
 			break ;
 		cur = cur->next ;
@@ -134,7 +132,13 @@ int Show_games(user* Player1 , user* Player2) {
 	printf("\n") ;
 	printf("\e[1;35m") , printf("Enter The Number for The Game You Want Loaded or Enter -1 To Return To The Main Menu\n\n") , printf("\e[0m") ;
 	int num ;
-	printf("\e[1;37m") , printf("input : ") , scanf("%d" , &num) , getchar() , printf("\e[0m") ;
+	while ( true ) {
+		printf("\e[1;37m") , printf("input : ") , scanf("%d" , &num) , getchar() , printf("\e[0m") ;
+		if ( num > it / 2 || (num < 1 && num != -1) )
+			printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+		else
+			break ;
+	}
 	if ( num != -1 ) {
 		// transfer data to Player1
 		num -- ;
@@ -183,32 +187,38 @@ void PVP(void) {
 	// run the game
 	while ( true ) {
 		int condition , Di , Dj ;
-
-		Player1.Turn = 1 , Player2.Turn = 0 ;
-		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player1.Username , Player1.Score , Player1.Cur_Score) , printf("\e[0m") ;
-		Show_board(&Player1 , Player1.Shadow_Board) ;
-		printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-		printf("\e[1;37m") , printf("(i,j) : ") , printf("\e[0m") ;
-		// checks if Di and Dj are valid
 		while ( true ) {
-			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
-			if ( Di == -1 && Dj == -1 ) {
-				printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
-				Save(&Player1) , Save(&Player2) ;
-				return ;
+			Player1.Turn = 1 , Player2.Turn = 0 ;
+			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player1.Username , Player1.Score , Player1.Cur_Score) , printf("\e[0m") ;
+			Show_board(&Player1 , Player1.Shadow_Board) ;
+			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
+			printf("\e[1;37m") , printf("(i,j) : ") , printf("\e[0m") ;
+			// checks if Di and Dj are valid
+			while ( true ) {
+				scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+				if ( Di == -1 && Dj == -1 ) {
+					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
+					Save(&Player1) , Save(&Player2) ;
+					return ;
+				}
+				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+					printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+				else
+					break ;
 			}
-			else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
-				printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
-			else
+			printf("\n") ;
+			condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
+
+			if ( Player1.Last_Shot )
+				printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
+
+			// visual mambo-jambo
+			sleep(2) ;
+			system("clear") ;
+
+			if ( condition == 1 || !Player1.Last_Shot )
 				break ;
 		}
-		printf("\n") ;
-		condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
-
-		// visual mambo-jambo
-		sleep(2) ;
-		system("clear") ;
-
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player1.Username) , printf("\e[0m") ;
 			Player1.Score += Player1.Cur_Score ;
@@ -218,31 +228,38 @@ void PVP(void) {
 			break ;
 		}
 
-		Player1.Turn = 0 , Player2.Turn = 1 ;
-		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player2.Username , Player2.Score , Player2.Cur_Score) , printf("\e[0m") ;
-		Show_board(&Player2 , Player2.Shadow_Board) ;
-		printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-		// checks if Di and Dj are valid
-		while ( true ) { 
-			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
-			if ( Di == -1 && Dj == -1 ) {
-				printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
-				Save(&Player1) , Save(&Player2) ;
-				return ;
+		while ( true ) {
+			Player1.Turn = 0 , Player2.Turn = 1 ;
+			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player2.Username , Player2.Score , Player2.Cur_Score) , printf("\e[0m") ;
+			Show_board(&Player2 , Player2.Shadow_Board) ;
+			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
+			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
+			// checks if Di and Dj are valid
+			while ( true ) { 
+				scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+				if ( Di == -1 && Dj == -1 ) {
+					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
+					Save(&Player1) , Save(&Player2) ;
+					return ;
+				}
+				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+					printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+				else
+					break ;
 			}
-			else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
-				printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
-			else
+			printf("\n") ;
+			condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
+
+			if ( Player2.Last_Shot )
+				printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
+
+			// visual mambo-jambo
+			sleep(2) ;
+			system("clear") ;
+		
+			if ( condition == 1 || !Player2.Last_Shot )
 				break ;
 		}
-		printf("\n") ;
-		condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
-
-		// visual mambo-jambo
-		sleep(2) ;
-		system("clear") ;
-
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player2.Username) , printf("\e[0m") ;
 			Player2.Score += Player2.Cur_Score ;
@@ -263,31 +280,38 @@ void PVP_load(user* User1 , user* User2) {
 		int condition , Di , Dj ;
 
 		if ( turn == 1 || turn == -1 ) {
-			Player1.Turn = 1 , Player2.Turn = 0 ;
-			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player1.Username , Player1.Score , Player1.Cur_Score) , printf("\e[0m") ;
-			Show_board(&Player1 , Player1.Shadow_Board) ;
-			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-			// checks if Di and Dj are valid
 			while ( true ) {
-				scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
-				if ( Di == -1 && Dj == -1 ) {
-					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
-					Save(&Player1) , Save(&Player2) ;
-					return ;
+				Player1.Turn = 1 , Player2.Turn = 0 ;
+				printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player1.Username , Player1.Score , Player1.Cur_Score) , printf("\e[0m") ;
+				Show_board(&Player1 , Player1.Shadow_Board) ;
+				printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
+				printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
+				// checks if Di and Dj are valid
+				while ( true ) {
+					scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+					if ( Di == -1 && Dj == -1 ) {
+						printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
+						Save(&Player1) , Save(&Player2) ;
+						return ;
+					}
+					else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+						printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+					else
+						break ;
 				}
-				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
-					printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
-				else
+				printf("\n") ;
+				condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
+
+				if ( Player1.Last_Shot )
+					printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
+
+				// visual mambo-jambo
+				sleep(2) ;
+				system("clear") ;
+
+				if ( condition == 1 || !Player1.Last_Shot )
 					break ;
 			}
-			printf("\n") ;
-			condition = Game_turn(&Player1 , &Player2 , Di , Dj) ;
-			
-			// visual mambo-jambo
-        	        sleep(2) ;
-	                system("clear") ;
-			
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("%s Wins\n\n" , Player1.Username) , printf("\e[0m") ;
 				Player1.Score += Player1.Cur_Score ;
@@ -299,31 +323,38 @@ void PVP_load(user* User1 , user* User2) {
 			turn = -1 ;
 		}
 		if ( turn == 2 || turn == -1 ) {
-			Player1.Turn = 0 , Player2.Turn = 1 ;
-			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player2.Username , Player2.Score , Player2.Cur_Score) , printf("\e[0m") ;
-			Show_board(&Player2 , Player2.Shadow_Board) ;
-			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-			// checks if Di and Dj are valid
 			while ( true ) {
-				scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
-				if ( Di == -1 && Dj == -1 ) {
-					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
-					Save(&Player1) , Save(&Player2) ;
-					return ;
+				Player1.Turn = 0 , Player2.Turn = 1 ;
+				printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player2.Username , Player2.Score , Player2.Cur_Score) , printf("\e[0m") ;
+				Show_board(&Player2 , Player2.Shadow_Board) ;
+				printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
+				printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
+				// checks if Di and Dj are valid
+				while ( true ) {
+					scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+					if ( Di == -1 && Dj == -1 ) {
+						printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
+						Save(&Player1) , Save(&Player2) ;
+						return ;
+					}
+					else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+						printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+					else
+						break ;
 				}
-				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
-					printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
-				else
+				printf("\n") ;
+				condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
+
+				if ( Player2.Last_Shot )
+					printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
+
+				// visual mambo-jambo
+				sleep(2) ;
+				system("clear") ;
+
+				if ( condition == 1 || !Player2.Last_Shot )
 					break ;
 			}
-			printf("\n") ;
-			condition = Game_turn(&Player2 , &Player1 , Di , Dj) ;
-
-			// visual mambo-jambo
-			sleep(2) ;
-			system("clear") ;
-
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("%s Wins\n\n" , Player2.Username) , printf("\e[0m") ;
 				Player2.Score += Player2.Cur_Score ;
@@ -354,31 +385,38 @@ void PVE(void) {
 	while ( true ) {
 		int condition , Di , Dj ;
 
-		Player.Turn = 1 , Bot.Turn = 0 ;
-		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player.Username , Player.Score , Player.Cur_Score) , printf("\e[0m") ;
-		Show_board(&Player , Player.Shadow_Board) ;
-		printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-		printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-		// checks if Di and Dj are valid
-		while ( true ) { 
-			scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
-			if ( Di == -1 && Dj == -1 ) {
-				printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
-				Save(&Player) , Save(&Bot) ;
-				return ;
+		while ( true ) {
+			Player.Turn = 1 , Bot.Turn = 0 ;
+			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player.Username , Player.Score , Player.Cur_Score) , printf("\e[0m") ;
+			Show_board(&Player , Player.Shadow_Board) ;
+			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
+			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
+			// checks if Di and Dj are valid
+			while ( true ) { 
+				scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+				if ( Di == -1 && Dj == -1 ) {
+					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
+					Save(&Player) , Save(&Bot) ;
+					return ;
+				}
+				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+					printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+				else
+					break ;
 			}
-			else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
-				printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
-			else
+			printf("\n") ;
+			condition = Game_turn(&Player , &Bot , Di , Dj) ;
+
+			if ( Player.Last_Shot )
+				printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
+
+			// visual mambo-jambo
+			sleep(2) ;
+			system("clear") ;
+
+			if ( condition == 1 || !Player.Last_Shot )
 				break ;
 		}
-		printf("\n") ;
-		condition = Game_turn(&Player , &Bot , Di , Dj) ;
-		
-		// visual mambo-jambo
-                sleep(2) ;
-                system("clear") ;
-		
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("%s Wins\n\n" , Player.Username) , printf("\e[0m") ;
 			Player.Score += Player.Cur_Score ;
@@ -386,9 +424,13 @@ void PVE(void) {
 			break ;
 		}
 		// TODO make bot smarter :)
-		Player.Turn = 0 , Bot.Turn = 1 ;
-		Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
-		condition = Game_turn(&Bot , &Player , Di , Dj) ;
+		while ( true ) {
+			Player.Turn = 0 , Bot.Turn = 1 ;
+			Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
+			condition = Game_turn(&Bot , &Player , Di , Dj) ;
+			if ( condition == 1 || !Bot.Last_Shot )
+				break ;
+		}
 		if ( condition == 1 ) {
 			printf("\e[1;37m") , printf("Bot Wins\n\n") , printf("\e[0m") ;
 			Player.Score += Player.Cur_Score / 2 ;
@@ -407,31 +449,38 @@ void PVE_load(user* User1 , user* User2) {
 		int condition , Di , Dj ;
 
 		if ( turn == 1 || turn == -1 ) {
-			Player.Turn = 1 , Bot.Turn = 0 ;
-			printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player.Username , Player.Score , Player.Cur_Score) , printf("\e[0m") ;
-			Show_board(&Player , Player.Shadow_Board) ;
-			printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
-			printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
-			// checks if Di and Dj are valid
 			while ( true ) {
-				scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
-				if ( Di == -1 && Dj == -1 ) {
-					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
-					Save(&Player) , Save(&Bot) ;
-					return ;
+				Player.Turn = 1 , Bot.Turn = 0 ;
+				printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player.Username , Player.Score , Player.Cur_Score) , printf("\e[0m") ;
+				Show_board(&Player , Player.Shadow_Board) ;
+				printf("\e[4;32m") , printf("Enter The Location You Want Destroyed Or Enter (-1,-1) To Save And Quit\n") , printf("\e[0m") ;
+				printf("\e[1;37m") , printf("(i,j) :\n") , printf("\e[0m") ;
+				// checks if Di and Dj are valid
+				while ( true ) {
+					scanf("(%d,%d)" , &Di , &Dj) ; getchar() ;
+					if ( Di == -1 && Dj == -1 ) {
+						printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
+						Save(&Player) , Save(&Bot) ;
+						return ;
+					}
+					else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
+						printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
+					else
+						break ;
 				}
-				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
-					printf("\e[1;31m") , printf("### Invalid Input ###\n") , printf("\e[0m") ;
-				else
+				printf("\n") ;
+				condition = Game_turn(&Player , &Bot , Di , Dj) ;
+
+				if ( Player.Last_Shot )
+					printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
+
+				// visual mambo-jambo
+				sleep(2) ;
+				system("clear") ;
+
+				if ( condition == 1 || !Player.Last_Shot )
 					break ;
 			}
-			printf("\n") ;
-			condition = Game_turn(&Player , &Bot , Di , Dj) ;
-			
-			// visual mambo-jambo
-        	        sleep(2) ;
-	                system("clear") ;
-			
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("%s Wins\n\n" , Player.Username) , printf("\e[0m") ;
 				Player.Score += Player.Cur_Score ;
@@ -442,9 +491,13 @@ void PVE_load(user* User1 , user* User2) {
 		}
 		// TODO make bot smarter :)
 		if ( turn == 2 || turn == -1 ) {
-			Player.Turn = 0 , Bot.Turn = 1 ;
-			Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
-			condition = Game_turn(&Bot , &Player , Di , Dj) ;
+			while ( true ) {
+				Player.Turn = 0 , Bot.Turn = 1 ;
+				Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
+				condition = Game_turn(&Bot , &Player , Di , Dj) ;
+				if ( condition == 1 || !Bot.Last_Shot )
+					break ;
+			}
 			if ( condition == 1 ) {
 				printf("\e[1;37m") , printf("Bot Wins\n\n") , printf("\e[0m") ;
 				Player.Score += Player.Cur_Score / 2 ;
