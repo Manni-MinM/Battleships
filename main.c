@@ -256,7 +256,7 @@ void PVP(void) {
 			// visual mambo-jambo
 			sleep(2) ;
 			system("clear") ;
-		
+
 			if ( condition == 1 || !Player2.Last_Shot )
 				break ;
 		}
@@ -380,8 +380,12 @@ void PVE(void) {
 	// init the game for player and bot
 	Game_init(&Bot) ;
 	Game_init(&Player) ;
+	// init the stack
+	Bot.Top = (plate**)malloc(sizeof(plate*)) ;
+	*(Bot.Top) = NULL ;
 	// run the game
 	srand(time(0)) ;
+
 	while ( true ) {
 		int condition , Di , Dj ;
 
@@ -397,6 +401,8 @@ void PVE(void) {
 				if ( Di == -1 && Dj == -1 ) {
 					printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
 					Save(&Player) , Save(&Bot) ;
+					// fix memory leak
+					free(Bot.Top) ;
 					return ;
 				}
 				else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
@@ -423,11 +429,13 @@ void PVE(void) {
 			Player.Cur_Score = 0 ;
 			break ;
 		}
-		// TODO make bot smarter :)
 		while ( true ) {
 			Player.Turn = 0 , Bot.Turn = 1 ;
-			Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
-			condition = Game_turn(&Bot , &Player , Di , Dj) ;
+			// smart version
+			point Target = Hunt_target(Bot.Top) ;
+			condition = Game_turn(&Bot , &Player , Target.X , Target.Y) ;
+			/*Show_board(&Bot , Bot.Shadow_Board) ;
+			printf("loc : (%d,%d)\n" , Target.X , Target.Y) ;*/
 			if ( condition == 1 || !Bot.Last_Shot )
 				break ;
 		}
@@ -439,11 +447,17 @@ void PVE(void) {
 		}
 	}
 	Change_Score(Player.Username , Player.Score) ;
+	// fix memory leak
+	free(Bot.Top) ;
 	return ;
 }
 void PVE_load(user* User1 , user* User2) {
 	int turn = Game_load(User1 , User2) ;
 	user Player = *User1 , Bot = *User2 ;
+	// init the stack
+	Bot.Top = (plate**)malloc(sizeof(plate*)) ;
+	*(Bot.Top) = NULL ;
+	// run the game
 	srand(time(0)) ;
 	while ( true ) {
 		int condition , Di , Dj ;
@@ -461,6 +475,8 @@ void PVE_load(user* User1 , user* User2) {
 					if ( Di == -1 && Dj == -1 ) {
 						printf("\e[1;31m") , printf("\nYour Progress Has Been Saved!\n\n") , printf("\e[0m") ;
 						Save(&Player) , Save(&Bot) ;
+						// fix memory leak
+						free(Bot.Top) ;
 						return ;
 					}
 					else if ( Di < 1 || Di > 10 || Dj < 1 || Dj > 10 )
@@ -489,12 +505,14 @@ void PVE_load(user* User1 , user* User2) {
 			}
 			turn = -1 ;
 		}
-		// TODO make bot smarter :)
 		if ( turn == 2 || turn == -1 ) {
 			while ( true ) {
 				Player.Turn = 0 , Bot.Turn = 1 ;
-				Di = (rand() % 10) + 1 , Dj = (rand() % 10) + 1 ;
-				condition = Game_turn(&Bot , &Player , Di , Dj) ;
+				// smart version
+				point Target = Hunt_target(Bot.Top) ;
+				condition = Game_turn(&Bot , &Player , Target.X , Target.Y) ;
+				/*Show_board(&Bot , Bot.Shadow_Board) ;
+				printf("loc : (%d,%d)\n" , Target.X , Target.Y) ;*/
 				if ( condition == 1 || !Bot.Last_Shot )
 					break ;
 			}
@@ -508,6 +526,8 @@ void PVE_load(user* User1 , user* User2) {
 		}
 	}
 	Change_Score(Player.Username , Player.Score) ;
+	// fix memory leak
+	free(Bot.Top) ;
 	return ;
 }
 

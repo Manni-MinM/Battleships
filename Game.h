@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "Linked_List.h"
+#include "Stack.h"
 
 #define SIZE 15
 
@@ -157,10 +157,10 @@ void Place_ship(user* Player , int Size , int type) {
 		for ( int i = My_Ship.St.X ; i <= My_Ship.En.X ; i ++ )
 			Board->Board[i][My_Ship.St.Y] = 'B' ;
 	}
-		
+
 	// visual mambo-jambo
 	if ( !type ) {
-		sleep(1) ;
+		sleep(2) ;
 		system("clear") ;
 	}
 
@@ -187,7 +187,7 @@ void Game_init(user* Player) {
 	for ( int i = 0 ; i < SIZE ; i ++ )
 		for ( int j = 0 ; j < SIZE ; j ++ )
 			Board->Board[i][j] = 'N' ;
-	int condition = 0 ;
+	int condition = 1 ;
 	if ( strcmp(Player->Username , "Bot") ) {
 		printf("\e[1;94m") , printf("####### User : %s #### Coins : %d #### Current Score : %d #######\n\n" , Player->Username , Player->Score , Player->Cur_Score) , printf("\e[0m") ;
 		printf("\e[1;32m") , printf("Enter 1 for auto initialization of the board and 0 for manual initialization\n\n") , printf("\e[0m") ;
@@ -208,8 +208,10 @@ void Game_init(user* Player) {
 	if ( strcmp(Player->Username , "Bot") )
 		Show_board(Player , Player->Battle_Board) ;
 	// visual mambo-jambo
-	sleep(2) ;
-	system("clear") ;
+	if ( strcmp(Player->Username , "Bot") ) {
+		sleep(2) ;
+		system("clear") ;
+	}
 
 	return ;
 }
@@ -227,7 +229,7 @@ int Game_load(user* Player1 , user* Player2) {
 		else
 			Append(Player1 , Player1->Battleship[i]) ;
 	}
-	
+
 	// init Player2 
 	Player2->head = (node**)malloc(sizeof(node*)) ;
 	Player2->tail = (node**)malloc(sizeof(node*)) ;
@@ -240,7 +242,7 @@ int Game_load(user* Player1 , user* Player2) {
 		else
 			Append(Player2 , Player2->Battleship[i]) ;
 	}
-	
+
 	// return player starting the next turn
 	if ( Player1->Turn == 1 )
 		return 1 ;
@@ -249,16 +251,38 @@ int Game_load(user* Player1 , user* Player2) {
 	return 0 ;
 }
 
+int Cord_is_valid(int Di , int Dj) {
+	if ( (Di >= 1 && Di <= 10) && (Dj>= 1 && Dj <= 10) )
+		return 1 ;
+	return 0 ;
+}
+
 int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 	// return 1 if Defender loses otherwise returns 0
 	game_board* Board_Defender = Defender->Battle_Board ;
 	game_board* Board_Attacker = Attacker->Shadow_Board ;
-	if ( Board_Defender->Board[Di][Dj] == 'B' ) {
+	if ( Board_Defender->Board[Di][Dj] == 'B' && Board_Attacker->Board[Di][Dj] == 'N' ) {
 		Board_Attacker->Board[Di][Dj] = 'E' ;
 		Attacker->Last_Shot = 1 ;
 		Attacker->Cur_Score += 1 ;
+		// add adjacent cells to stack
+		if ( !strcmp(Attacker->Username , "Bot") ) {
+			point Target ;
+			Target.X = Di + 1 , Target.Y = Dj ;
+			if ( Cord_is_valid(Di + 1 , Dj) )
+				Push(Attacker->Top , Target) ;
+			Target.X = Di , Target.Y = Dj + 1 ;
+			if ( Cord_is_valid(Di , Dj + 1) )
+				Push(Attacker->Top , Target) ;
+			Target.X = Di - 1 , Target.Y = Dj ;
+			if ( Cord_is_valid(Di - 1 , Dj) )
+				Push(Attacker->Top , Target) ;
+			Target.X = Di , Target.Y = Dj - 1 ;
+			if ( Cord_is_valid(Di , Dj - 1) )
+				Push(Attacker->Top , Target) ;
+		}
 	}
-	else {
+	else if ( Board_Defender->Board[Di][Dj] == 'W' ) {
 		Attacker->Last_Shot = 0 ;
 		Board_Attacker->Board[Di][Dj] = 'W' ;
 	}
@@ -291,6 +315,11 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 					Board_Attacker->Board[i][STj - 1] = 'W' ;
 					Board_Attacker->Board[i][ENj + 1] = 'W' ;
 				}
+
+				// clear stack for bot
+				if ( !strcmp(Attacker->Username , "Bot") )
+					while ( *(Attacker->Top) != NULL )
+						Pop(Attacker->Top) ;
 				break ;
 			}
 		}
@@ -318,6 +347,11 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 					Board_Attacker->Board[STi - 1][j] = 'W' ;
 					Board_Attacker->Board[ENi + 1][j] = 'W' ;
 				}
+
+				// clear stack for bot
+				if ( !strcmp(Attacker->Username , "Bot") )
+					while ( *(Attacker->Top) != NULL )
+						Pop(Attacker->Top) ;
 				break ;
 			}
 		}
@@ -332,3 +366,13 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 	return 0 ;
 }
 
+point Hunt_target(plate** Top) {
+	point Target ;
+	if ( *Top == NULL )
+		Target.X = (rand() % 10) + 1 , Target.Y = (rand() % 10) + 1 ;
+	else {
+		Target = (*Top)->Target ;
+		Pop(Top) ;
+	}
+	return Target ;
+}

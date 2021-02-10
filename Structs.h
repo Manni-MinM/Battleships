@@ -21,6 +21,12 @@ struct NODE {
 } ;
 typedef struct NODE node ;
 
+struct PLATE {
+	point Target ;
+	struct PLATE* next ;
+} ;
+typedef struct PLATE plate ;
+
 typedef struct {
 	char Username[100] ;
 	int Turn ;
@@ -30,6 +36,8 @@ typedef struct {
 	
 	node** head ;
 	node** tail ;
+	
+	plate** Top ;
 	
 	ship Battleship[10] ;
 	
