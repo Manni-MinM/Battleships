@@ -170,6 +170,7 @@ void Place_ship(user* Player , int Size , int type) {
 void Game_init(user* Player) {
 	// init Player
 	Player->Turn = 0 ;
+	Player->Cur_Score = 0 ;
 	Player->head = (node**)malloc(sizeof(node*)) ;
 	Player->tail = (node**)malloc(sizeof(node*)) ;
 	*(Player->head) = NULL ;
@@ -297,13 +298,13 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 				if ( Board_Attacker->Board[STi][j] != 'E' )
 					flag = 0 ;
 			if ( flag ) {
-				if ( ENj - STj == 5 )
+				if ( abs(ENj - STj + 1) == 5 )
 					Attacker->Cur_Score += 5 ;
-				else if ( ENj - STj == 3 )
+				else if ( abs(ENj - STj + 1) == 3 )
 					Attacker->Cur_Score += 8 ;
-				else if ( ENj - STj == 2 )
+				else if ( abs(ENj - STj + 1) == 2 )
 					Attacker->Cur_Score += 12 ;
-				else if ( ENj - STj == 1 )
+				else if ( abs(ENj - STj + 1) == 1 )
 					Attacker->Cur_Score += 25 ;
 				Delete(Defender , cur->Battleship) ;
 				for ( int j = STj - 1 ; j <= ENj + 1 ; j ++ ) {
@@ -329,13 +330,13 @@ int Game_turn(user* Attacker , user* Defender , int Di , int Dj) {
 				if ( Board_Attacker->Board[i][STj] != 'E' )
 					flag = 0 ;
 			if ( flag ) {
-				if ( ENi - STi == 5 )
+				if ( abs(ENi - STi + 1) == 5 )
 					Attacker->Cur_Score += 5 ;
-				else if ( ENi - STi == 3 )
+				else if ( abs(ENi - STi + 1) == 3 )
 					Attacker->Cur_Score += 8 ;
-				else if ( ENi - STi == 2 )
+				else if ( abs(ENi - STi + 1) == 2 )
 					Attacker->Cur_Score += 12 ;
-				else if ( ENi - STi == 1 )
+				else if ( abs(ENi - STi + 1)== 1 )
 					Attacker->Cur_Score += 25 ;
 				Delete(Defender , cur->Battleship) ;
 				for ( int i = STi - 1 ; i <= ENi + 1 ; i ++ ) {

@@ -413,7 +413,7 @@ void PVE(void) {
 			printf("\n") ;
 			condition = Game_turn(&Player , &Bot , Di , Dj) ;
 
-			if ( Player.Last_Shot )
+			if ( Player.Last_Shot && condition == 0 )
 				printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
 
 			// visual mambo-jambo
@@ -487,7 +487,7 @@ void PVE_load(user* User1 , user* User2) {
 				printf("\n") ;
 				condition = Game_turn(&Player , &Bot , Di , Dj) ;
 
-				if ( Player.Last_Shot )
+				if ( Player.Last_Shot && condition == 0 )
 					printf("\e[1;31m") , printf("HIT CONFIRMED , HERE IS A BONUS !\n") , printf("\e[0m") ;
 
 				// visual mambo-jambo
